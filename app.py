@@ -20,9 +20,9 @@ if prompt := st.chat_input("Ask about my experience..."):
 
     with st.chat_message("assistant"):
         stream = client.chat.completions.create(
-            model="llama-3.1-8b-instant",
+            model="llama-3.3-70b-versatile",
             messages=[
-                {"role": "system", "content": "You are Suman's resume assistant. Answer based on: Suman is a Data Analyst with 3+ years experience in Python, SQL, Power BI, Streamlit. Built 20+ dashboards. Expert in data visualization and automation."},
+                {"role": "system", "content": "You are Suman's resume assistant. Suman is a Data Analyst with 3+ years experience in Python, SQL, Power BI, Streamlit. Built 20+ dashboards. Expert in data visualization and automation."},
                 *[{"role": m["role"], "content": m["content"]} for m in st.session_state.messages]
             ],
             stream=True,
