@@ -1,10 +1,10 @@
 import streamlit as st
-from openai import OpenAI
+from groq import Groq
 
 st.set_page_config(page_title="Suman's Resume Bot", page_icon="🤖")
 st.title("🤖 Ask Me About Suman's Resume")
 
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+client = Groq(api_key=st.secrets["GROQ_API_KEY"])
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -20,7 +20,7 @@ if prompt := st.chat_input("Ask about my experience..."):
 
     with st.chat_message("assistant"):
         stream = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="llama-3.1-8b-instant",
             messages=[
                 {"role": "system", "content": "You are Suman's resume assistant. Answer based on: Suman is a Data Analyst with 3+ years experience in Python, SQL, Power BI, Streamlit. Built 20+ dashboards. Expert in data visualization and automation."},
                 *[{"role": m["role"], "content": m["content"]} for m in st.session_state.messages]
