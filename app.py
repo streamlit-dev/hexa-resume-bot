@@ -1,6 +1,9 @@
 import streamlit as st
 from groq import Groq
 
+client = Groq(
+    api_key=st.secrets["GROQ_API_KEY"]
+)
 # Page Configuration
 st.set_page_config(
     page_title="Suman's Resume Bot",
