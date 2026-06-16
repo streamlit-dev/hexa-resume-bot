@@ -8,12 +8,19 @@ st.set_page_config(
     layout="centered"
 )
 
+# Title
 st.title("🤖 Ask Me About Suman's Resume")
 
-# Initialize Groq Client
-client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+# Initialize Chat History
+if "messages" not in st.session_state:
+    st.session_state.messages = []
 
-# System Prompt
+# Display Previous Messages
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
+
+# Resume Information
 SYSTEM_PROMPT = """
 You are Suman's Resume Assistant.
 
@@ -23,29 +30,21 @@ Suman is a Data Analyst with 3+ years of experience in:
 - Power BI
 - Streamlit
 
-Achievements:
-- Built 20+ dashboards
-- Expert in data visualization
-- Skilled in automation and reporting
-- Strong analytical and problem-solving abilities
+Key Achievements:
+- Built 20+ interactive dashboards
+- Automated reporting processes
+- Strong expertise in data visualization
+- Skilled in data cleaning and analysis
+- Experienced in business intelligence solutions
 
-Answer questions professionally and confidently.
+Answer questions professionally and confidently based on this information.
 """
 
-# Chat History
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
-# Display Previous Messages
-for msg in st.session_state.messages:
-    with st.chat_message(msg["role"]):
-        st.markdown(msg["content"])
-
 # User Input
-prompt = st.chat_input("Ask about my experience...")
+prompt = st.chat_input("Ask about my experience, skills, or projects...")
 
 if prompt:
-    # Save User Message
+    # Show User Message
     st.session_state.messages.append(
         {"role": "user", "content": prompt}
     )
@@ -53,22 +52,33 @@ if prompt:
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Generate Response
-    with st.chat_message("assistant"):
-        response_placeholder = st.empty()
-
-        stream = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                *st.session_state.messages
-            ],
-            stream=True
+    try:
+        # Initialize Groq Client
+        client = Groq(
+            api_key=st.secrets["GROQ_API_KEY"]
         )
 
-        response = st.write_stream(stream)
+        with st.chat_message("assistant"):
+            stream = client.chat.completions.create(
+                model="llama-3.1-8b-instant",
+                messages=[
+                    {"role": "system", "content": SYSTEM_PROMPT},
+                    *st.session_state.messages
+                ],
+                stream=True
+            )
 
-    # Save Assistant Response
-    st.session_state.messages.append(
-        {"role": "assistant", "content": response}
-    )
+            response = st.write_stream(stream)
+
+        # Save Assistant Response
+        st.session_state.messages.append(
+            {"role": "assistant", "content": response}
+        )
+
+    except KeyError:
+        st.error(
+            "GROQ_API_KEY not found. Please add it to Streamlit secrets."
+        )
+
+    except Exception as e:
+        st.error(f"Error: {str(e)}")
